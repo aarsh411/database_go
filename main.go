@@ -9,17 +9,17 @@ import (
     _ "github.com/go-sql-driver/mysql"
 )
 
-type Employee struct {
+type developer_team struct {
     Id    int
     Name  string
-    City string
+    Department string
 }
 
 func dbConn() (db *sql.DB) {
     dbDriver := "mysql"
     dbUser := "aarsh"
     dbPass := "1234"
-    dbName := "goblog"
+    dbName := "sql_go"
     db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
     if err != nil {
         panic(err.Error())
@@ -31,22 +31,22 @@ var tmpl = template.Must(template.ParseGlob("form/*"))
 
 func Index(w http.ResponseWriter, r *http.Request) {
     db := dbConn()
-    selDB, err := db.Query("SELECT * FROM Employee ORDER BY id DESC")
+    selDB, err := db.Query("SELECT * FROM developer_team ORDER BY id DESC")
     if err != nil {
         panic(err.Error())
     }
-    emp := Employee{}
-    res := []Employee{}
+    emp := developer_team{}
+    res := []developer_team{}
     for selDB.Next() {
         var id int
-        var name, city string
-        err = selDB.Scan(&id, &name, &city)
+        var name, department string
+        err = selDB.Scan(&id, &name, &department)
         if err != nil {
             panic(err.Error())
         }
         emp.Id = id
         emp.Name = name
-        emp.City = city
+        emp.Department = department
         res = append(res, emp)
     }
     tmpl.ExecuteTemplate(w, "Index", res)
@@ -56,21 +56,21 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func Show(w http.ResponseWriter, r *http.Request) {
     db := dbConn()
     nId := r.URL.Query().Get("id")
-    selDB, err := db.Query("SELECT * FROM Employee WHERE id=?", nId)
+    selDB, err := db.Query("SELECT * FROM developer_team WHERE id=?", nId)
     if err != nil {
         panic(err.Error())
     }
-    emp := Employee{}
+    emp := developer_team{}
     for selDB.Next() {
         var id int
-        var name, city string
-        err = selDB.Scan(&id, &name, &city)
+        var name, department string
+        err = selDB.Scan(&id, &name, &department)
         if err != nil {
             panic(err.Error())
         }
         emp.Id = id
         emp.Name = name
-        emp.City = city
+        emp.Department = department
     }
     tmpl.ExecuteTemplate(w, "Show", emp)
     defer db.Close()
@@ -83,21 +83,21 @@ func New(w http.ResponseWriter, r *http.Request) {
 func Edit(w http.ResponseWriter, r *http.Request) {
     db := dbConn()
     nId := r.URL.Query().Get("id")
-    selDB, err := db.Query("SELECT * FROM Employee WHERE id=?", nId)
+    selDB, err := db.Query("SELECT * FROM developer_team WHERE id=?", nId)
     if err != nil {
         panic(err.Error())
     }
-    emp := Employee{}
+    emp := developer_team{}
     for selDB.Next() {
         var id int
-        var name, city string
-        err = selDB.Scan(&id, &name, &city)
+        var name, department string
+        err = selDB.Scan(&id, &name, &department)
         if err != nil {
             panic(err.Error())
         }
         emp.Id = id
         emp.Name = name
-        emp.City = city
+        emp.Department = department
     }
     tmpl.ExecuteTemplate(w, "Edit", emp)
     defer db.Close()
@@ -107,13 +107,13 @@ func Insert(w http.ResponseWriter, r *http.Request) {
     db := dbConn()
     if r.Method == "POST" {
         name := r.FormValue("name")
-        city := r.FormValue("city")
-        insForm, err := db.Prepare("INSERT INTO Employee(name, city) VALUES(?,?)")
+        department := r.FormValue("department")
+        insForm, err := db.Prepare("INSERT INTO developer_team(name, department) VALUES(?,?)")
         if err != nil {
             panic(err.Error())
         }
-        insForm.Exec(name, city)
-        log.Println("INSERT: Name: " + name + " | City: " + city)
+        insForm.Exec(name, department)
+        log.Println("INSERT: Name: " + name + " | department: " + department)
     }
     defer db.Close()
     http.Redirect(w, r, "/", 301)
@@ -123,14 +123,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
     db := dbConn()
     if r.Method == "POST" {
         name := r.FormValue("name")
-        city := r.FormValue("city")
+        department := r.FormValue("department")
         id := r.FormValue("uid")
-        insForm, err := db.Prepare("UPDATE Employee SET name=?, city=? WHERE id=?")
+        insForm, err := db.Prepare("UPDATE developer_team SET name=?, department=? WHERE id=?")
         if err != nil {
             panic(err.Error())
         }
-        insForm.Exec(name, city, id)
-        log.Println("UPDATE: Name: " + name + " | City: " + city)
+        insForm.Exec(name, department, id)
+        log.Println("UPDATE: Name: " + name + " | Department: " + department)
     }
     defer db.Close()
     http.Redirect(w, r, "/", 301)
@@ -139,7 +139,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 func Delete(w http.ResponseWriter, r *http.Request) {
     db := dbConn()
     emp := r.URL.Query().Get("id")
-    delForm, err := db.Prepare("DELETE FROM Employee WHERE id=?")
+    delForm, err := db.Prepare("DELETE FROM developer_team WHERE id=?")
     if err != nil {
         panic(err.Error())
     }
@@ -150,6 +150,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
     log.Println("Server started on: http://localhost:8080")
     http.HandleFunc("/", Index)
     http.HandleFunc("/show", Show)
