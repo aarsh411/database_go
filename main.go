@@ -13,6 +13,7 @@ type developer_team struct {
     Id    int
     Name  string
     Department string
+	Address	string
 }
 
 func dbConn() (db *sql.DB) {
@@ -39,14 +40,15 @@ func Index(w http.ResponseWriter, r *http.Request) {
     res := []developer_team{}
     for selDB.Next() {
         var id int
-        var name, department string
-        err = selDB.Scan(&id, &name, &department)
+        var name, department, address string
+        err = selDB.Scan(&id, &name, &department, &address)
         if err != nil {
             panic(err.Error())
         }
         emp.Id = id
         emp.Name = name
         emp.Department = department
+		emp.Address = address
         res = append(res, emp)
     }
     tmpl.ExecuteTemplate(w, "Index", res)
@@ -63,14 +65,15 @@ func Show(w http.ResponseWriter, r *http.Request) {
     emp := developer_team{}
     for selDB.Next() {
         var id int
-        var name, department string
-        err = selDB.Scan(&id, &name, &department)
+        var name, department, address string
+        err = selDB.Scan(&id, &name, &department, &address)
         if err != nil {
             panic(err.Error())
         }
         emp.Id = id
         emp.Name = name
         emp.Department = department
+		emp.Address = address
     }
     tmpl.ExecuteTemplate(w, "Show", emp)
     defer db.Close()
@@ -90,14 +93,15 @@ func Edit(w http.ResponseWriter, r *http.Request) {
     emp := developer_team{}
     for selDB.Next() {
         var id int
-        var name, department string
-        err = selDB.Scan(&id, &name, &department)
+        var name, department, address string
+        err = selDB.Scan(&id, &name, &department, &address)
         if err != nil {
             panic(err.Error())
         }
         emp.Id = id
         emp.Name = name
         emp.Department = department
+		emp.Address = address
     }
     tmpl.ExecuteTemplate(w, "Edit", emp)
     defer db.Close()
@@ -108,12 +112,14 @@ func Insert(w http.ResponseWriter, r *http.Request) {
     if r.Method == "POST" {
         name := r.FormValue("name")
         department := r.FormValue("department")
-        insForm, err := db.Prepare("INSERT INTO developer_team(name, department) VALUES(?,?)")
+		address := r.FormValue("address")
+
+        insForm, err := db.Prepare("INSERT INTO developer_team(name, department, address) VALUES(?,?,?)")
         if err != nil {
             panic(err.Error())
         }
-        insForm.Exec(name, department)
-        log.Println("INSERT: Name: " + name + " | department: " + department)
+        insForm.Exec(name, department, address)
+        log.Println("INSERT: Name: " + name + " | department: " + department +  " | Address" + address)
     }
     defer db.Close()
     http.Redirect(w, r, "/", 301)
@@ -124,13 +130,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
     if r.Method == "POST" {
         name := r.FormValue("name")
         department := r.FormValue("department")
+		address := r.FormValue("address")
         id := r.FormValue("uid")
-        insForm, err := db.Prepare("UPDATE developer_team SET name=?, department=? WHERE id=?")
+        insForm, err := db.Prepare("UPDATE developer_team SET name=?, department=?, address=? WHERE id=?")
         if err != nil {
             panic(err.Error())
         }
-        insForm.Exec(name, department, id)
-        log.Println("UPDATE: Name: " + name + " | Department: " + department)
+        insForm.Exec(name, department, address, id)
+        log.Println("INSERT: Name: " + name + " | department: " + department + " | Address" + address)
     }
     defer db.Close()
     http.Redirect(w, r, "/", 301)
