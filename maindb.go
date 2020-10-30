@@ -16,7 +16,7 @@ func main() {
 	}
 
 	defer db.Close()
-	//insert, err := db.Query("INSERT INTO users VALUES ( 'Divyang' )")
+	//insert, err := db.Query("INSERT INTO users VALUES ( 'aarsh' )")
 	insert, err := db.Query("INSERT INTO golang VALUES ( 2,'Dhiraj','2020-09-28'),(3,'divyang','2020-09-28')")
 	if err != nil {
 		panic(err.Error())
