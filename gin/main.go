@@ -54,16 +54,20 @@ func main() {
 		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", name, department, address, salary)
 	})
 	router.DELETE("/delete", func(c *gin.Context) {
-		id := c.Query("id")
-		db := dbConn()
+		var e Employee
+		//id := c.Query("id")
+		if c.BindJSON(&e) == nil {
+
+			db := dbConn()
 	
-		delForm, err := db.Prepare("DELETE FROM developer_team WHERE id=?")
-		if err != nil {
-			panic(err.Error())
+			delForm, err := db.Prepare("DELETE FROM developer_team WHERE id=?")
+			if err != nil {
+				panic(err.Error())
+			}
+			delForm.Exec(e.id)
+			log.Println("DELETE")
+			defer db.Close()
 		}
-		delForm.Exec(id)
-		log.Println("DELETE")
-		defer db.Close()
 		
 	})
 
