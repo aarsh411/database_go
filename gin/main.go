@@ -15,8 +15,8 @@ type Employee struct {
 	Name       string `json:name`
 	Department string `json:department`
 	Address     int    `json:address`
+	Salary      int   `json:salary`
 }
-
 func dbConn() (db *sql.DB) {
 	dbDriver := "mysql"
 	dbUser := "aarsh"
@@ -36,21 +36,24 @@ func main() {
 		name := c.Query("name")
 		department := c.Query("department")
 		address := c.Query("address")
+		salary := c.Query("salary")
+
 
 		c.JSON(200, gin.H{
 			"name":       name,
 			"department": department,
 			"address":     address,
+			"salary":   salary,
 		})
 		db := dbConn()
-		insForm, err := db.Prepare("INSERT INTO developer_team (name, department, address) VALUES(?,?,?)")
+		insForm, err := db.Prepare("INSERT INTO developer_team (name, department, address, salary) VALUES(?,?,?,?)")
 		if err != nil {
 			panic(err.Error())
 		}
-		insForm.Exec(name, department, address)
-		fmt.Printf("name: %s; department: %s; address: %s", name, department, address)
+		insForm.Exec(name, department, address, salary)
+		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", name, department, address, salary)
 	})
-	router.GET("/delete", func(c *gin.Context) {
+	router.DELETE("/delete", func(c *gin.Context) {
 		id := c.Query("id")
 		db := dbConn()
 	
@@ -70,20 +73,22 @@ func main() {
 		name := c.Query("name")
 		department := c.Query("department")
 		address := c.Query("address")
+		salary := c.Query("salary")
 		db := dbConn()
 
 		c.JSON(200, gin.H{
 			"name":       name,
 			"department": department,
 			"address":     address,
+			"salary":   salary,
 		})
 	
-		insForm, err := db.Prepare("UPDATE developer_team SET name=?, department=?, address=? WHERE id=?")
+		insForm, err := db.Prepare("UPDATE developer_team SET name=?, department=?, address=?, salary=? WHERE id=?")
 		if err != nil {
 			panic(err.Error())
 		}
-		insForm.Exec(name, department, address, id)
-		fmt.Printf("name: %s; department: %s; address: %s", name, department, address)
+		insForm.Exec(name, department, address, salary, id)
+		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", name, department, address, salary)
 	})
 
 	router.GET("/get", func(c *gin.Context) {
@@ -94,20 +99,22 @@ func main() {
 			panic(err.Error())
 		}
 		var name, address, department string
+		var salary int
 		for selDB.Next() {
 
-			err = selDB.Scan(&id, &name, &department, &address)
+			err = selDB.Scan(&id, &name, &department, &address, &salary)
 			if err != nil {
 				panic(err.Error())
 			}
 		}
-		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", name, department, address)
+		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", name, department, address, salary)
 
 		c.JSON(200, gin.H{
 			"id":         id,
 			"name":       name,
 			"department": department,
 			"address":     address,
+			"salary": salary,
 		})
 
 	})
