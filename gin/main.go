@@ -32,26 +32,29 @@ func main() {
 	router := gin.Default()
 
 	router.POST("/add", func(c *gin.Context) {
+		var e Employee
 
-		name := c.Query("name")
-		department := c.Query("department")
-		address := c.Query("address")
-		salary := c.Query("salary")
-
+		//name := c.Query("name")
+		//department := c.Query("department")
+		//address := c.Query("address")
+		//salary := c.Query("salary")
+		if c.BindJSON(&e)== nil{
+		
 
 		c.JSON(200, gin.H{
-			"name":       name,
-			"department": department,
-			"address":     address,
-			"salary":   salary,
+			"name":       e.Name,
+			"department": e.Department,
+			"address":     e.Address,
+			"salary":   e.Salary,
 		})
 		db := dbConn()
 		insForm, err := db.Prepare("INSERT INTO developer_team (name, department, address, salary) VALUES(?,?,?,?)")
 		if err != nil {
 			panic(err.Error())
 		}
-		insForm.Exec(name, department, address, salary)
-		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", name, department, address, salary)
+		insForm.Exec(e.Name, e.Department, e.Address, e.Salary)
+		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", e.Name, e.Department, e.Address, e.Salary)
+		}
 	})
 	router.DELETE("/delete", func(c *gin.Context) {
 		var e Employee
@@ -64,7 +67,7 @@ func main() {
 			if err != nil {
 				panic(err.Error())
 			}
-			delForm.Exec(e.id)
+			delForm.Exec(e.Id)
 			log.Println("DELETE")
 			defer db.Close()
 		}
@@ -73,40 +76,45 @@ func main() {
 
 	
 	router.PUT("/update", func(c *gin.Context) {
-		id := c.Query("id")
-		name := c.Query("name")
-		department := c.Query("department")
-		address := c.Query("address")
-		salary := c.Query("salary")
+		//id := c.Query("id")
+		//name := c.Query("name")
+		//department := c.Query("department")
+		//address := c.Query("address")
+		//salary := c.Query("salary")
+		var e Employee
+	if c.BindJSON(&e) == nil {
 		db := dbConn()
 
 		c.JSON(200, gin.H{
-			"name":       name,
-			"department": department,
-			"address":     address,
-			"salary":   salary,
+			"name":       e.Name,
+			"department": e.Department,
+			"address":     e.Address,
+			"salary":   e.Salary,
 		})
 	
 		insForm, err := db.Prepare("UPDATE developer_team SET name=?, department=?, address=?, salary=? WHERE id=?")
 		if err != nil {
 			panic(err.Error())
 		}
-		insForm.Exec(name, department, address, salary, id)
-		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", name, department, address, salary)
+		insForm.Exec(e.Name, e.Department, e.Address, e.Salary, e.Id)
+		//fmt.Printf("name: %s; department: %s; address: %s; salary: %d", e.Name, e.Department, e.Address, e.Salary)
+		}
 	})
 
 	router.GET("/get", func(c *gin.Context) {
-		id := c.Query("id")
+		//id := c.Query("id")
 		db := dbConn()
-		selDB, err := db.Query("SELECT * FROM developer_team WHERE id=?", id)
+		var e Employee
+		if c.BindJSON(&e) == nil {
+		selDB, err := db.Query("SELECT * FROM developer_team WHERE id=?", e.Id)
 		if err != nil {
 			panic(err.Error())
 		}
 		var name, address, department string
 		var salary int
-		for selDB.Next() {
+		for selDB.Next(){
 
-			err = selDB.Scan(&id, &name, &department, &address, &salary)
+			err = selDB.Scan(&e.Id, &e.Name, &e.Department, &e.Address, &e.Salary)
 			if err != nil {
 				panic(err.Error())
 			}
@@ -114,12 +122,14 @@ func main() {
 		fmt.Printf("name: %s; department: %s; address: %s; salary: %d", name, department, address, salary)
 
 		c.JSON(200, gin.H{
-			"id":         id,
-			"name":       name,
-			"department": department,
-			"address":     address,
-			"salary": salary,
+			"id":         e.Id,
+			"name":       e.Name,
+			"department": e.Department,
+			"address":     e.Address,
+			"salary": e.Salary,
 		})
+	
+	}
 
 	})
 
